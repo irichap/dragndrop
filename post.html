@@ -6,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
-  <style>body { padding-top:56px; } .nav-link.active { font-weight:bold; }</style>
+  <style>
+    body { padding-top:56px; }
+    .nav-link.active { font-weight:bold; }
+  </style>
 </head>
 <body>
   <!-- Navbar -->
@@ -18,8 +21,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link active" href="post.html">Create Post</a></li>
           <li class="nav-item"><a class="nav-link" href="builder.html">Page Builder</a></li>
           <li class="nav-item"><a class="nav-link" href="form-builder.html">Form Builder</a></li>
@@ -51,22 +53,25 @@
     function sanitizeHTML(h) {
       return h.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi,'');
     }
+
     document.addEventListener('DOMContentLoaded', () => {
       CKEDITOR.replace('editor');
-      let posts = JSON.parse(localStorage.getItem('cms_posts')||'[]');
+      let posts = JSON.parse(localStorage.getItem('cms_posts') || '[]');
       const params = new URLSearchParams(location.search);
       const id = params.get('id');
-      if (id!==null && posts[id]) {
+      if (id !== null && posts[id]) {
         document.getElementById('form-title').innerText = 'Edit Post';
         document.getElementById('post-title').value = posts[id].title;
         CKEDITOR.instances.editor.setData(posts[id].content);
       }
+
       document.getElementById('post-form').addEventListener('submit', e => {
         e.preventDefault();
         const title = sanitizeText(document.getElementById('post-title').value.trim());
         const content = sanitizeHTML(CKEDITOR.instances.editor.getData());
         const entry = { title, content, date: new Date().toISOString() };
-        if (id!==null && posts[id]) posts[id] = entry; else posts.push(entry);
+        if (id !== null && posts[id]) posts[id] = entry;
+        else posts.push(entry);
         localStorage.setItem('cms_posts', JSON.stringify(posts));
         window.location.href = 'index.html';
       });
