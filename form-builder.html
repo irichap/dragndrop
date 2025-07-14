@@ -1,35 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Form Builder – MyCMS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap & jQuery -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <title>MyCMS – Form Builder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- Bootstrap 5 CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- jQuery (required by formBuilder) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-  <!-- formBuilder & formRender -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/formBuilder/3.8.2/form-builder.min.css">
+  <!-- formBuilder CSS & JS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/formBuilder/3.8.2/form-builder.min.css"
+  />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/formBuilder/3.8.2/form-builder.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/formBuilder/3.8.2/form-render.min.js"></script>
+
   <style>
     body { padding-top: 56px; background: #f8f9fa; }
-    .container { max-width: 900px; }
+    .nav-link.active { font-weight: bold; }
     .panel { border: 1px solid #ced4da; background: #fff; padding: 15px; margin-bottom: 20px; }
     pre { white-space: pre-wrap; word-break: break-word; }
   </style>
 </head>
 <body>
-  <!-- Navbar (Form Builder active) -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="index.html">MyCMS</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navMenu"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="post.html">Create Post</a></li>
           <li class="nav-item"><a class="nav-link" href="builder.html">Page Builder</a></li>
           <li class="nav-item"><a class="nav-link active" href="form-builder.html">Form Builder</a></li>
         </ul>
@@ -37,59 +51,81 @@
     </div>
   </nav>
 
-  <!-- Form Builder Panels -->
   <div class="container mt-4">
     <h2>Drag-and-Drop Form Builder</h2>
-    <div class="panel" id="fb-editor"></div>
-    <div class="d-flex gap-2 mb-3">
+
+    <!-- formBuilder Editor -->
+    <div id="fb-editor" class="panel"></div>
+
+    <!-- Action Buttons -->
+    <div class="mb-3">
       <button class="btn btn-primary" onclick="renderForm()">Render Form</button>
       <button class="btn btn-success" onclick="exportJSON()">Export JSON</button>
-      <button class="btn btn-danger" onclick="exportHTML()">Export HTML</button>
+      <button class="btn btn-danger"  onclick="exportHTML()">Export HTML</button>
       <button class="btn btn-secondary" onclick="saveForm()">Save Form</button>
       <button class="btn btn-secondary" onclick="loadForm()">Load Form</button>
     </div>
 
     <h4>Rendered Form</h4>
-    <div class="panel" id="fb-render"></div>
+    <div id="fb-render" class="panel"></div>
 
     <h4>Form JSON</h4>
-    <pre class="panel" id="fb-json"></pre>
+    <pre id="fb-json" class="panel"></pre>
 
     <h4>Form HTML</h4>
-    <pre class="panel" id="fb-html"></pre>
+    <pre id="fb-html" class="panel"></pre>
   </div>
 
   <script>
-    let fb;
-    jQuery(() => { fb = $('#fb-editor').formBuilder(); });
+    let fbInstance;
 
+    // Initialize formBuilder on DOM ready
+    jQuery(function($) {
+      fbInstance = $('#fb-editor').formBuilder({
+        disableFields: ['button']  // you can adjust which fields to show/hide
+      });
+    });
+
+    // Render the formPreview
     function renderForm() {
-      const data = fb.actions.getData('json');
+      const data = fbInstance.actions.getData('json');
       $('#fb-render').formRender({ formData: data });
     }
 
+    // Export JSON to textarea
     function exportJSON() {
-      $('#fb-json').text(JSON.stringify(fb.actions.getData('json'), null, 2));
+      const data = fbInstance.actions.getData('json');
+      document.getElementById('fb-json').textContent = JSON.stringify(data, null, 2);
     }
 
+    // Export HTML to textarea
     function exportHTML() {
-      $('#fb-html').text(fb.actions.getData('html'));
+      const html = fbInstance.actions.getData('html');
+      document.getElementById('fb-html').textContent = html;
     }
 
+    // Save JSON template to localStorage
     function saveForm() {
-      localStorage.setItem('cms_form', JSON.stringify(fb.actions.getData('json')));
-      alert('Form saved!');
+      const data = fbInstance.actions.getData('json');
+      localStorage.setItem('cms_form', JSON.stringify(data));
+      alert('Form template saved!');
     }
 
+    // Load JSON template from localStorage
     function loadForm() {
       const saved = localStorage.getItem('cms_form');
-      if (!saved) return alert('No saved form.');
+      if (!saved) {
+        alert('No saved form found.');
+        return;
+      }
       $('#fb-editor').formBuilder('destroy');
-      fb = $('#fb-editor').formBuilder({ formData: JSON.parse(saved) });
-      alert('Form loaded!');
+      fbInstance = $('#fb-editor').formBuilder({ formData: JSON.parse(saved) });
+      renderForm();
+      alert('Form template loaded!');
     }
   </script>
 
+  <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
