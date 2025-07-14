@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Page Builder – MyCMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap & SortableJS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    body { padding-top: 56px; background: #f8f9fa; }
+    .block { position: relative; margin-bottom: 10px; background: #fff; border: 1px solid #dee2e6; }
+    .block-controls { position: absolute; top: 5px; right: 5px; }
+    #canvas { min-height: 400px; border: 2px dashed #adb5bd; padding: 10px; background: #fff; }
+    pre { white-space: pre-wrap; word-break: break-word; border: 1px solid #ced4da; padding: 10px; }
+  </style>
+</head>
+<body>
+  <!-- Navbar (Page Builder active) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">MyCMS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link active" href="builder.html">Page Builder</a></li>
+          <li class="nav-item"><a class="nav-link" href="form-builder.html">Form Builder</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Builder UI -->
+  <div class="container mt-4">
+    <h2>Page Builder</h2>
+    <div class="mb-3">
+      <button class="btn btn-outline-primary" onclick="add('text')">Text</button>
+      <button class="btn btn-outline-secondary" onclick="add('image')">Image</button>
+      <button class="btn btn-outline-success" onclick="add('button')">Button</button>
+      <button class="btn btn-outline-warning" onclick="add('row')">Row (2 cols)</button>
+      <button class="btn btn-danger" onclick="exportHTML()">Export HTML</button>
+      <button class="btn btn-success" onclick="savePage()">Save Page</button>
+      <button class="btn btn-secondary" onclick="loadPage()">Load Page</button>
+    </div>
+    <div id="canvas"></div>
+    <h4 class="mt-4">Exported HTML</h4>
+    <pre id="output"></pre>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    Sortable.create(canvas, { animation: 150, group: 'page', ghostClass: 'sortable-ghost' });
+
+    const templates = {
+      text: `<div class="p-3"><p contenteditable="true">Editable paragraph</p></div>`,
+      image: `<div class="p-3">
+                <input type="text" class="form-control mb-2" placeholder="Image URL" 
+                       oninput="this.nextElementSibling.src=this.value">
+                <img src="" class="img-fluid">
+              </div>`,
+      button: `<div class="p-3"><button class="btn btn-primary" contenteditable="true">Button</button></div>`,
+      row: `<div class="row">
+              <div class="col-md-6"><div class="dropzone p-2" style="min-height:80px;"></div></div>
+              <div class="col-md-6"><div class="dropzone p-2" style="min-height:80px;"></div></div>
+            </div>`
+    };
+
+    function add(type) {
+      const block = document.createElement('div');
+      block.className = 'block';
+      block.innerHTML = `
+        <div class="block-controls">
+          <button class="btn btn-sm btn-danger" onclick="this.closest('.block').remove()">🗑️</button>
+        </div>
+        ${templates[type]}`;
+      canvas.append(block);
+
+      if (type === 'row') {
+        block.querySelectorAll('.dropzone').forEach(z => {
+          Sortable.create(z, { group: 'page', animation: 150, ghostClass: 'sortable-ghost' });
+        });
+      }
+    }
+
+    function exportHTML() {
+      const copy = canvas.cloneNode(true);
+      copy.querySelectorAll('.block-controls').forEach(el => el.remove());
+      document.getElementById('output').textContent = copy.innerHTML.trim();
+    }
+
+    function savePage() {
+      localStorage.setItem('cms_page', canvas.innerHTML);
+      alert('Page saved!');
+    }
+
+    function loadPage() {
+      const saved = localStorage.getItem('cms_page');
+      if (!saved) return alert('No saved page.');
+      canvas.innerHTML = saved;
+      canvas.querySelectorAll('.dropzone').forEach(z => {
+        Sortable.create(z, { group: 'page', animation: 150, ghostClass: 'sortable-ghost' });
+      });
+      alert('Page loaded!');
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
