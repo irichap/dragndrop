@@ -21,8 +21,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="post.html">Create Post</a></li>
           <li class="nav-item"><a class="nav-link" href="builder.html">Page Builder</a></li>
           <li class="nav-item"><a class="nav-link" href="form-builder.html">Form Builder</a></li>
@@ -31,27 +30,29 @@
     </div>
   </nav>
 
-  <!-- Latest Posts -->
+  <!-- Posts List -->
   <div class="container mt-4">
     <h1>Latest Posts</h1>
     <div id="posts-list"></div>
   </div>
 
-  <!-- Core Scripts -->
   <script>
+    // Utility: strip HTML tags
     function stripHTML(html) {
       const tmp = document.createElement('div');
       tmp.innerHTML = html;
-      return tmp.textContent||tmp.innerText||'';
+      return tmp.textContent || tmp.innerText || '';
     }
+    // Prevent <script> injection
     function sanitizeHTML(html) {
       return html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
     }
+
     document.addEventListener('DOMContentLoaded', () => {
       const list = document.getElementById('posts-list');
-      const posts = JSON.parse(localStorage.getItem('cms_posts')||'[]');
+      const posts = JSON.parse(localStorage.getItem('cms_posts') || '[]');
       if (!posts.length) {
-        list.innerHTML = '<p>No posts found.</p>';
+        list.innerHTML = '<p>No posts yet. <a href="post.html">Create one</a>.</p>';
         return;
       }
       posts.forEach((p, i) => {
