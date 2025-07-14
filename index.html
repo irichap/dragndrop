@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MyCMS Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"/>
+  <title>MyCMS – Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
-    body { padding-top: 56px; }
-    .nav-link.active { font-weight: bold; }
+    body { padding-top:56px; }
+    .nav-link.active { font-weight:bold; }
   </style>
 </head>
 <body>
@@ -20,9 +20,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link active" href="index.html">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="post.html">Create Post</a></li>
           <li class="nav-item"><a class="nav-link" href="builder.html">Page Builder</a></li>
           <li class="nav-item"><a class="nav-link" href="form-builder.html">Form Builder</a></li>
         </ul>
@@ -30,13 +31,47 @@
     </div>
   </nav>
 
-  <!-- Dashboard Content -->
+  <!-- Latest Posts -->
   <div class="container mt-4">
-    <h1>Welcome, Admin</h1>
-    <p>Select “Posts,” “Page Builder,” or “Form Builder” from the menu to get started.</p>
+    <h1>Latest Posts</h1>
+    <div id="posts-list"></div>
   </div>
 
-  <!-- Bootstrap Bundle JS -->
+  <!-- Core Scripts -->
+  <script>
+    function stripHTML(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent||tmp.innerText||'';
+    }
+    function sanitizeHTML(html) {
+      return html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const list = document.getElementById('posts-list');
+      const posts = JSON.parse(localStorage.getItem('cms_posts')||'[]');
+      if (!posts.length) {
+        list.innerHTML = '<p>No posts found.</p>';
+        return;
+      }
+      posts.forEach((p, i) => {
+        const title = p.title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const clean = sanitizeHTML(p.content);
+        const excerpt = stripHTML(clean).substring(0,150) + '...';
+        const date = new Date(p.date).toLocaleString();
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${title}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">${date}</h6>
+            <p class="card-text">${excerpt}</p>
+            <a href="view.html?id=${i}" class="btn btn-primary">Read More</a>
+          </div>`;
+        list.appendChild(card);
+      });
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
