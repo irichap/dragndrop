@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Post – MyCMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- TinyMCE (no-api-key free plan) -->
+  <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+  <style>body { padding-top: 56px; }</style>
+</head>
+<body>
+  <!-- Navbar (Posts active) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">MyCMS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="posts.html">Posts</a></li>
+          <li class="nav-item"><a class="nav-link" href="builder.html">Page Builder</a></li>
+          <li class="nav-item"><a class="nav-link" href="form-builder.html">Form Builder</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Post Editor Form -->
+  <div class="container mt-4">
+    <h2 id="form-title">Create Post</h2>
+    <form id="post-form">
+      <div class="mb-3">
+        <label for="post-title" class="form-label">Title</label>
+        <input type="text" id="post-title" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="post-content" class="form-label">Content</label>
+        <textarea id="post-content"></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Save Post</button>
+    </form>
+  </div>
+
+  <script>
+    tinymce.init({ selector: '#post-content', height: 300 });
+    const urlParams = new URLSearchParams(location.search);
+    const postId = urlParams.get('id');
+    const posts = JSON.parse(localStorage.getItem('cms_posts') || '[]');
+
+    if (postId !== null) {
+      document.getElementById('form-title').textContent = 'Edit Post';
+      const p = posts[postId];
+      document.getElementById('post-title').value = p.title;
+      tinymce.get('post-content').on('init', () => {
+        tinymce.get('post-content').setContent(p.content);
+      });
+    }
+
+    document.getElementById('post-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('post-title').value.trim();
+      const content = tinymce.get('post-content').getContent();
+      const entry = { title, content, date: new Date().toISOString() };
+      if (postId !== null) posts[postId] = entry;
+      else posts.push(entry);
+      localStorage.setItem('cms_posts', JSON.stringify(posts));
+      alert('Post saved!');
+      location.href = 'posts.html';
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
